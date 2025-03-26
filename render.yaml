@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: discord-monitor-service
+    env: docker
+    buildCommand: docker build -t discord-monitor-service .
+    startCommand: docker run -p 10000:10000 discord-monitor-service
+    envVars:
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_GUILD_ID
+        sync: false
+      - key: DISCORD_GENERAL_CHANNEL_ID
+        sync: false
+      - key: DISCORD_BLOCKCHAIN_CHANNEL_ID
+        sync: false
+      - key: DISCORD_WEBCRAWLER_CHANNEL_ID
+        sync: false
+      - key: DISCORD_N8N_CHANNEL_ID
+        sync: false
+      - key: DISCORD_ALERTS_CHANNEL_ID
+        sync: false
+      - key: BLOCKCHAIN_SERVICE_URL
+        value: https://onchain-monitor.onrender.com/
+      - key: WEBCRAWLER_SERVICE_URL
+        value: https://monitor-flask-flame.vercel.app/
+      - key: N8N_SERVICE_URL
+        value: https://n8n-latest-wz1v.onrender.com
+      - key: POLLING_INTERVAL
+        value: 60
+      - key: ALERT_COOLDOWN
+        value: 300
+      - key: LOG_LEVEL
+        value: INFO
