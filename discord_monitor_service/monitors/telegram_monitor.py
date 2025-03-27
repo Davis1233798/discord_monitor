@@ -17,18 +17,21 @@ class TelegramMonitor(BaseMonitor):
     Telegram監控器，負責監控Telegram通知服務的狀態
     """
     
-    def __init__(self, name: str, bot_token: str, check_interval: int = 60):
+    def __init__(self, name: str, bot_token: str, chat_id: str = None, check_interval: int = 60):
         """
         初始化Telegram監控器
         
         Args:
             name: 監控器名稱
             bot_token: Telegram機器人令牌
+            chat_id: Telegram聊天ID（可選）
             check_interval: 檢查間隔（秒）
         """
         super().__init__(name, "https://api.telegram.org", check_interval)
         self.bot_token = bot_token
+        self.chat_id = chat_id
         self.service_url = f"https://api.telegram.org/bot{bot_token}/getMe"
+        logger.info(f"初始化Telegram監控器 (bot_token長度: {len(bot_token) if bot_token else 0}, chat_id: {chat_id})")
     
     async def check_service(self) -> Tuple[str, str, List[Alert]]:
         """

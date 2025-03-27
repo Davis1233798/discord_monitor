@@ -78,7 +78,8 @@ async def main():
             "telegram": TelegramMonitor(
                 name="Telegram通知服務",
                 bot_token=config.get("services.telegram.bot_token"),
-                chat_id=config.get("services.telegram.chat_id")
+                chat_id=config.get("services.telegram.chat_id"),
+                check_interval=config.get("monitoring.polling_interval", 60)
             )
         }
         
