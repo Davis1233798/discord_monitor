@@ -9,16 +9,10 @@ class TelegramMonitor:
     async def check_health(self) -> bool:
         """檢查Telegram服務健康狀態"""
         try:
-            # 發送測試訊息到指定頻道
-            url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
-            data = {
-                "chat_id": self.chat_id,
-                "text": "🔍 Telegram服務健康檢查",
-                "parse_mode": "HTML"
-            }
-            
+            # 使用getMe方法檢查bot是否有效
+            url = f"https://api.telegram.org/bot{self.bot_token}/getMe"
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=data) as response:
+                async with session.get(url) as response:
                     if response.status == 200:
                         result = await response.json()
                         return result.get("ok", False)
