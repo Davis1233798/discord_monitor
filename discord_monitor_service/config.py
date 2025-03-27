@@ -75,16 +75,20 @@ class Config:
         
         # 服務端點
         self._config['services'] = {
+            'telegram': {
+                'bot_token': os.getenv('TELEGRAM_BOT_TOKEN'),
+                'chat_id': os.getenv('TELEGRAM_CHAT_ID')
+            },
             'blockchain': {
-                'url': os.getenv('BLOCKCHAIN_SERVICE_URL'),
+                'url': os.getenv('BLOCKCHAIN_SERVICE_URL', 'https://onchain-monitor.onrender.com/'),
                 'api_key': os.getenv('BLOCKCHAIN_API_KEY')
             },
             'webcrawler': {
-                'url': os.getenv('WEBCRAWLER_SERVICE_URL'),
+                'url': os.getenv('WEBCRAWLER_SERVICE_URL', 'https://monitor-flask-flame.vercel.app/'),
                 'api_key': os.getenv('WEBCRAWLER_API_KEY')
             },
             'n8n': {
-                'url': os.getenv('N8N_SERVICE_URL')
+                'url': os.getenv('N8N_SERVICE_URL', 'https://n8n-latest-wz1v.onrender.com')
             }
         }
         
