@@ -8,6 +8,7 @@ from pathlib import Path
 import signal
 import sys
 import logging
+from aiohttp import web
 
 from .config import config, ConfigurationError
 from .utils.logging import get_logger
@@ -19,6 +20,23 @@ from .monitors.n8n_monitor import N8nMonitor
 
 logger = get_logger(__name__)
 
+# HTTP服務器處理函數
+async def handle_request(request):
+    """處理HTTP請求，返回服務狀態"""
+    return web.Response(text="Discord Monitor Service is running")
+
+# 啟動HTTP服務器
+async def run_http_server():
+    """啟動HTTP服務器，綁定到環境變數指定的端口"""
+    port = int(os.environ.get("PORT", 10000))
+    app = web.Application()
+    app.add_routes([web.get('/', handle_request)])
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logger.info(f"HTTP服務器已啟動在端口 {port}")
+
 async def main():
     """
     主函數，初始化並啟動監控服務
@@ -27,6 +45,9 @@ async def main():
         # 顯示版本信息
         from . import __version__
         logger.info(f"Discord監控服務 v{__version__} 正在啟動...")
+        
+        # 啟動HTTP服務器
+        await run_http_server()
         
         # 創建Discord機器人
         bot = MonitorBot()

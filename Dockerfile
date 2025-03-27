@@ -14,5 +14,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 複製應用程式代碼
 COPY . .
 
+# 設置環境變數
+ENV PORT=10000
+
+# 暴露端口
+EXPOSE $PORT
+
 # 默認命令
 CMD ["python", "start.py"]

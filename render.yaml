@@ -3,7 +3,7 @@ services:
     name: discord-monitor-service
     env: docker
     buildCommand: docker build -t discord-monitor-service .
-    startCommand: docker run -p $PORT:$PORT -e PORT=$PORT discord-monitor-service
+    startCommand: docker run -p $PORT:10000 -e PORT=$PORT discord-monitor-service
     envVars:
       - key: DISCORD_BOT_TOKEN
         sync: false
@@ -31,3 +31,7 @@ services:
         value: 300
       - key: LOG_LEVEL
         value: INFO
+      - key: BLOCKCHAIN_DISCORD_WEBHOOK_URL
+        sync: false
+      - key: WEBCRAWLER_DISCORD_WEBHOOK_URL
+        sync: false
