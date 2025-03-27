@@ -20,7 +20,8 @@ class HttpError(Exception):
 
 async def async_get(url: str, headers: Optional[Dict[str, str]] = None, 
                    timeout: int = 10, retries: int = 3,
-                   retry_delay: int = 1) -> Dict[str, Any]:
+                   retry_delay: int = 1,
+                   expect_json: bool = False) -> Dict[str, Any]:
     """
     執行異步GET請求
     
@@ -30,6 +31,7 @@ async def async_get(url: str, headers: Optional[Dict[str, str]] = None,
         timeout: 請求超時（秒）
         retries: 重試次數
         retry_delay: 重試間隔（秒）
+        expect_json: 是否期望JSON響應
     
     Returns:
         回應數據
@@ -45,10 +47,15 @@ async def async_get(url: str, headers: Optional[Dict[str, str]] = None,
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=headers, timeout=timeout) as response:
                     if response.status == 200:
-                        try:
-                            return await response.json()
-                        except json.JSONDecodeError:
-                            return {"text": await response.text()}
+                        if expect_json:
+                            try:
+                                return await response.json()
+                            except json.JSONDecodeError:
+                                text = await response.text()
+                                return {"success": True, "text": text, "content_type": response.content_type}
+                        else:
+                            text = await response.text()
+                            return {"success": True, "text": text, "content_type": response.content_type}
                     else:
                         error_text = await response.text()
                         logger.error(f"HTTP GET 請求失敗: {url}, 狀態碼: {response.status}, 內容: {error_text}")
@@ -72,7 +79,8 @@ async def async_post(url: str, data: Optional[Dict[str, Any]] = None,
                     json_data: Optional[Dict[str, Any]] = None,
                     headers: Optional[Dict[str, str]] = None,
                     timeout: int = 10, retries: int = 3,
-                    retry_delay: int = 1) -> Dict[str, Any]:
+                    retry_delay: int = 1,
+                    expect_json: bool = False) -> Dict[str, Any]:
     """
     執行異步POST請求
     
@@ -84,6 +92,7 @@ async def async_post(url: str, data: Optional[Dict[str, Any]] = None,
         timeout: 請求超時（秒）
         retries: 重試次數
         retry_delay: 重試間隔（秒）
+        expect_json: 是否期望JSON響應
     
     Returns:
         回應數據
@@ -100,10 +109,15 @@ async def async_post(url: str, data: Optional[Dict[str, Any]] = None,
                 async with session.post(url, data=data, json=json_data, 
                                        headers=headers, timeout=timeout) as response:
                     if response.status == 200:
-                        try:
-                            return await response.json()
-                        except json.JSONDecodeError:
-                            return {"text": await response.text()}
+                        if expect_json:
+                            try:
+                                return await response.json()
+                            except json.JSONDecodeError:
+                                text = await response.text()
+                                return {"success": True, "text": text, "content_type": response.content_type}
+                        else:
+                            text = await response.text()
+                            return {"success": True, "text": text, "content_type": response.content_type}
                     else:
                         error_text = await response.text()
                         logger.error(f"HTTP POST 請求失敗: {url}, 狀態碼: {response.status}, 內容: {error_text}")
@@ -125,7 +139,8 @@ async def async_post(url: str, data: Optional[Dict[str, Any]] = None,
 
 def sync_get(url: str, headers: Optional[Dict[str, str]] = None,
             timeout: int = 10, retries: int = 3,
-            retry_delay: int = 1) -> Dict[str, Any]:
+            retry_delay: int = 1,
+            expect_json: bool = False) -> Dict[str, Any]:
     """
     執行同步GET請求
     
@@ -135,6 +150,7 @@ def sync_get(url: str, headers: Optional[Dict[str, str]] = None,
         timeout: 請求超時（秒）
         retries: 重試次數
         retry_delay: 重試間隔（秒）
+        expect_json: 是否期望JSON響應
     
     Returns:
         回應數據
@@ -149,10 +165,13 @@ def sync_get(url: str, headers: Optional[Dict[str, str]] = None,
         try:
             response = requests.get(url, headers=headers, timeout=timeout)
             if response.status_code == 200:
-                try:
-                    return response.json()
-                except json.JSONDecodeError:
-                    return {"text": response.text}
+                if expect_json:
+                    try:
+                        return response.json()
+                    except json.JSONDecodeError:
+                        return {"success": True, "text": response.text, "content_type": response.headers.get("Content-Type")}
+                else:
+                    return {"success": True, "text": response.text, "content_type": response.headers.get("Content-Type")}
             else:
                 logger.error(f"HTTP GET 請求失敗: {url}, 狀態碼: {response.status_code}, 內容: {response.text}")
                 raise HttpError(response.status_code, response.text)
