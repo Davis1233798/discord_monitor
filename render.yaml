@@ -3,7 +3,7 @@ services:
     name: discord-monitor-service
     env: docker
     buildCommand: docker build -t discord-monitor-service .
-    startCommand: docker run -p 10000:10000 discord-monitor-service
+    startCommand: docker run -p $PORT:$PORT -e PORT=$PORT discord-monitor-service
     envVars:
       - key: DISCORD_BOT_TOKEN
         sync: false

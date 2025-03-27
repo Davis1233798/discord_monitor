@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 默認命令
-CMD ["python", "-m", "discord_monitor_service"]
+CMD ["python", "start.py"]
