@@ -17,6 +17,7 @@ from .bot.commands import setup_commands
 from .monitors.blockchain_monitor import BlockchainMonitor
 from .monitors.web_monitor import WebCrawlerMonitor
 from .monitors.n8n_monitor import N8nMonitor
+from .monitors.telegram_monitor import TelegramMonitor
 
 logger = get_logger(__name__)
 
@@ -72,6 +73,11 @@ async def main():
             "n8n": N8nMonitor(
                 name="n8n工作流服務",
                 service_url=config.get("services.n8n.url"),
+                check_interval=config.get("monitoring.polling_interval", 60)
+            ),
+            "telegram": TelegramMonitor(
+                name="Telegram通知服務",
+                bot_token=config.get("services.telegram.bot_token", ""),
                 check_interval=config.get("monitoring.polling_interval", 60)
             )
         }

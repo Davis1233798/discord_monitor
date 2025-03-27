@@ -42,7 +42,8 @@ discord_monitor_service/
 │   │   ├── base_monitor.py           # 監控器基類
 │   │   ├── blockchain_monitor.py     # 區塊鏈監控
 │   │   ├── web_monitor.py            # 網站爬蟲監控
-│   │   └── n8n_monitor.py            # n8n服務監控
+│   │   ├── n8n_monitor.py            # n8n服務監控
+│   │   └── telegram_monitor.py       # Telegram服務監控
 │   └── utils/
 │       ├── __init__.py
 │       ├── logging.py                # 日誌工具
@@ -55,7 +56,8 @@ discord_monitor_service/
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
-└── docker-compose.yml
+├── Dockerfile                        # Docker容器化配置
+└── render.yaml                       # Render部署配置
 ```
 
 ## 設計原則
@@ -110,6 +112,7 @@ discord_monitor_service/
    - 區塊鏈監控服務: 檢查回應中是否包含 "Monitor is running"
    - 網站爬蟲服務: 檢查JSON回應中的 "status" 字段是否為 "success"
    - n8n服務: 檢查響應內容中是否包含 "n8n" 關鍵字
+   - Telegram服務: 檢查API響應中的 "ok" 字段是否為 true
 
 4. **簡化警報生成**:
    - 只針對連接性和基本健康檢查生成警報
@@ -135,6 +138,46 @@ discord_monitor_service/
 3. 生成基本健康報告
 4. 觸發相應警報
 
+### 各監控服務的角色與關聯
+
+#### 區塊鏈監控服務
+- **主要功能**: 監控區塊鏈服務的可用性和基本運行狀態
+- **資料通道**: 直接向Discord頻道發送通知，使用專用或通用的Discord Webhook
+- **檢測邏輯**: 檢查服務是否可連接，並檢查回應中是否包含特定文本
+
+#### 網站爬蟲監控服務
+- **主要功能**: 監控網站爬蟲服務的運行狀態與數據收集情況
+- **資料通道**: 直接向Discord頻道發送通知，使用專用或通用的Discord Webhook
+- **檢測邏輯**: 確認服務響應，並可能檢查爬蟲任務的成功率
+
+#### n8n工作流監控服務
+- **主要功能**: 確保n8n自動化工作流平台的正常運作
+- **資料通道**: 直接向Discord頻道發送通知，使用Discord Webhook
+- **檢測邏輯**: 檢查服務主頁面是否可訪問並包含"n8n"關鍵字
+
+#### Telegram監控服務
+- **主要功能**: 監控Telegram通知服務的正常運作狀態
+- **資料通道**: 通過Discord系統傳送Telegram服務的狀態信息
+- **檢測邏輯**: 使用Telegram API的getMe方法檢查Telegram機器人是否在線並正常運作
+
+#### Discord主監控服務
+- **主要功能**: 中央集成所有監控信息，提供統一界面
+- **資料整合**: 收集所有服務的監控數據，並提供統一的儀表板
+- **頻道管理**: 將各服務的警報分發到對應的頻道，重要警報同時發送到警報頻道
+
+### 通知流程架構
+```
+[服務] ---監控--> [各服務自己的監控模組] ---發送通知--> [Discord頻道]
+                                          |
+[Telegram API] <--監控-- [Telegram監控模組] ---|
+                                          |
+[區塊鏈服務] <--監控-- [區塊鏈監控模組] -------|
+                                          |
+[網站爬蟲服務] <--監控-- [網站爬蟲監控模組] ---|
+                                          |
+[n8n服務] <--監控-- [n8n監控模組] ------------|
+```
+
 ### 事件處理流程
 1. 監控器檢測到異常事件
 2. 事件被轉發到警報系統
@@ -147,6 +190,23 @@ discord_monitor_service/
 - **高**: 需要儘快處理的問題 (服務部分功能失效)
 - **中**: 非緊急但需要關注的問題 (性能下降)
 - **低**: 提示性質的資訊 (預警或改進建議)
+
+## 部署與維護
+
+### 部署架構
+- **Discord監控服務**: 部署在Render上，作為中央監控服務
+- **區塊鏈監控服務**: 獨立部署在Render上，通過Webhook與Discord整合
+- **Web爬蟲監控服務**: 部署在Vercel上，通過Webhook與Discord整合
+
+### 環境變數管理
+- 所有敏感設定 (例如API金鑰、令牌) 通過環境變數注入
+- 使用同步功能確保服務間設定一致性
+- 專門的Webhook URL用於將特定服務的消息發送到對應的Discord頻道
+
+### 聚合通知策略
+- 把所有的Telegram通知轉移到Discord平台
+- 使用專門的Discord頻道代替不同的通知平台
+- 透過Discord的通知設定進行細粒度通知控制
 
 ## 擴展性設計
 

@@ -17,6 +17,8 @@ services:
         sync: false
       - key: DISCORD_N8N_CHANNEL_ID
         sync: false
+      - key: DISCORD_TELEGRAM_CHANNEL_ID
+        sync: false
       - key: DISCORD_ALERTS_CHANNEL_ID
         sync: false
       - key: BLOCKCHAIN_SERVICE_URL
@@ -25,6 +27,10 @@ services:
         value: https://monitor-flask-flame.vercel.app/
       - key: N8N_SERVICE_URL
         value: https://n8n-latest-wz1v.onrender.com
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
       - key: POLLING_INTERVAL
         value: 60
       - key: ALERT_COOLDOWN
